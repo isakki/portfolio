@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Isakki Muthu — System Design Portfolio</title>
+<meta name="description" content="System design case studies by Isakki Muthu.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top"><a class="logo" href="index.html">Isakki<span>.dev</span></a><nav><a href="#projects">Projects</a><a href="#about">About</a></nav><a class="toplink" href="mailto:isakkimuthu02@gmail.com">Contact</a></header>
+
+<main>
+<section class="intro">
+<div class="author"><div class="avatar">IM</div><div><b>Isakki Muthu</b><small>Full-Stack Developer · 8 years IT · 7 years Full-Stack</small></div></div>
+<h1>System Design of a Shipping &amp; Logistics ERP Platform</h1>
+<p class="dek">A practical system-design case study based on my enterprise ERP project experience, covering requirements, data model, APIs, architecture, permission flow, bottlenecks and optimisation.</p>
+<div class="meta"><span>14 min read</span><span>·</span><span>System Design</span><span>·</span><span>Oct 2026</span></div>
+<div class="share"><button onclick="copyLink()">Copy article link</button><a href="#contents">Read article ↓</a></div>
+</section>
+
+<div class="page">
+<aside class="sidebar" id="contents"><div class="side-title">CONTENTS</div>
+<a href="#functional">01&nbsp; Functional requirements</a><a href="#nonfunctional">02&nbsp; Non-functional requirements</a><a href="#estimation">03&nbsp; Back-of-the-envelope estimation</a><a href="#data">04&nbsp; Data model</a><a href="#api">05&nbsp; API endpoints</a><a href="#highlevel">06&nbsp; High-level system design</a><a href="#lowlevel">07&nbsp; Low-level system design</a><a href="#bottleneck">08&nbsp; Bottlenecks</a><a href="#optimisation">09&nbsp; Optimisation</a><a href="#projects">10&nbsp; More project case studies</a>
+</aside>
+
+<article class="article">
+<div class="note"><b>Scope note:</b> Facts about my projects and technologies are based on my resume. Architecture diagrams and endpoint examples marked “proposed” are portfolio/interview designs, not claims about undocumented production internals.</div>
+
+<section id="functional"><h2>Functional requirement</h2>
+<blockquote>1) Users should be able to access only the ERP menus and documents permitted to them.<br><br>2) Users should be able to work across shipping, finance/accounting and HR/payroll modules.<br><br>3) Users should be able to search, filter and retrieve operational records.<br><br>4) Users should be able to view and manage business documents through DMS-related workflows.<br><br>5) The platform should support reporting and module-specific business workflows.</blockquote>
+</section>
+
+<section id="nonfunctional"><h2>Non functional Requirement</h2>
+<blockquote>1) High availability with minimal latency for common ERP operations.<br><br>2) Secure, permission-aware access to menus, documents and APIs.<br><br>3) Scalable enough to support a large enterprise application surface.<br><br>4) Maintainable code and deployment environments across many modules.<br><br>5) Reliable data access and predictable performance for reporting workloads.</blockquote>
+<p>My resume describes the platform as spanning <b>160+ feature modules</b> across Shipping Operations, Finance &amp; Accounting, and HR &amp; Payroll.</p>
+</section>
+
+<section id="estimation"><h2>Back of the Envelope Estimation</h2>
+<p>The resume does not provide production traffic, concurrent users or database-size numbers. Instead of inventing those numbers, I use a capacity-planning model that can be filled with real production metrics.</p>
+<div class="math"><b>Peak RPS</b><span>=</span><code>Daily API requests × peak factor ÷ 86,400</code></div>
+<div class="math"><b>Storage growth</b><span>=</span><code>Documents/day × average size × retention period</code></div>
+<div class="math"><b>DB capacity</b><span>=</span><code>Operational data + indexes + replication overhead</code></div>
+<p>For an enterprise ERP, read-heavy reporting endpoints and document traffic should be measured separately from transactional APIs.</p>
+</section>
+
+<section id="data"><h2>Data Model</h2>
+<p><i>Proposed portfolio model:</i> a permission-aware ERP can separate identity, authorization, module metadata, documents and audit information.</p>
+<div class="diagram schema">
+<div class="dbbox"><b>USER</b><small>id · role_id · status</small></div><div class="dbbox"><b>ROLE</b><small>id · name</small></div><div class="dbbox"><b>MENU_PERMISSION</b><small>role · menu · document</small></div>
+<div class="dbbox"><b>MODULE</b><small>id · domain · status</small></div><div class="dbbox"><b>DOCUMENT</b><small>id · module · type · file</small></div><div class="dbbox"><b>AUDIT_LOG</b><small>user · action · timestamp</small></div>
+</div>
+</section>
+
+<section id="api"><h2>API Endpoint</h2>
+<p><i>Proposed examples:</i></p>
+<div class="api"><div><code>GET /api/menus</code><span>Return permitted menus for current user</span></div><div><code>GET /api/documents</code><span>Return authorised document records</span></div><div><code>GET /api/documents/:id</code><span>Get a document by ID</span></div><div><code>POST /api/documents</code><span>Create document metadata / upload workflow</span></div><div><code>PUT /api/documents/:id</code><span>Update document metadata</span></div><div><code>GET /api/reports/:reportId</code><span>Execute a filtered report</span></div></div>
+</section>
+
+<section id="highlevel"><h2>High Level System Design</h2>
+<p>The project is implemented with React.js and Node.js, uses Express.js APIs with PostgreSQL, and uses Docker for consistent development and deployment environments. The following is a proposed portfolio architecture around those technologies.</p>
+<div class="arch">
+<div class="archnode blue">React.js / Next.js<br><small>ERP Web Client</small></div><div class="down">↓</div>
+<div class="archnode purple">Auth + API Layer<br><small>REST · Permission checks</small></div><div class="down">↓</div>
+<div class="row"><div class="archnode">Shipping</div><div class="archnode">Finance</div><div class="archnode">HR / Payroll</div><div class="archnode">DMS</div></div>
+<div class="down">↓</div>
+<div class="row"><div class="archnode green">PostgreSQL</div><div class="archnode green">Object Storage</div><div class="archnode green">Cache</div><div class="archnode green">Queue</div></div>
+<div class="down">↓</div>
+<div class="row"><div class="archnode orange">Docker</div><div class="archnode orange">CI/CD</div><div class="archnode orange">Cloud</div></div>
+</div>
+</section>
+
+<section id="lowlevel"><h2>Low Level System design</h2>
+<h3>Permission-aware document flow</h3>
+<div class="flow">
+<div>① Login / identify user</div><span>↓</span><div>② Menu API</div><span>↓</span><div>③ Validate menu + document permission</div><span>↓</span><div>④ Document API filters authorised records</div><span>↓</span><div>⑤ React renders permitted data</div><span>↓</span><div>⑥ Audit important actions</div>
+</div>
+<h3>Deployment flow</h3>
+<div class="flow horizontal"><div>Developer</div><span>→</span><div>Git</div><span>→</span><div>CI/CD</div><span>→</span><div>Docker image</div><span>→</span><div>Environment</div></div>
+</section>
+
+<section id="bottleneck"><h2>Bottleneck</h2>
+<p>At this scale, the likely pressure points are not one single API but the interaction between many modules, shared database workloads, report queries, document traffic and repeated permission checks.</p>
+<div class="cards"><div><b>Large module surface</b><p>More modules increase coupling and release complexity.</p></div><div><b>Database-heavy reports</b><p>Large filtered queries can compete with transactional traffic.</p></div><div><b>Document traffic</b><p>Large files should avoid unnecessary application-server transfer.</p></div><div><b>Permission lookup</b><p>Repeated authorization checks can add latency.</p></div></div>
+</section>
+
+<section id="optimisation"><h2>Optimisation</h2>
+<ol class="numbered"><li><b>Indexing:</b> add PostgreSQL indexes for common filters, joins and sort keys.</li><li><b>Pagination:</b> never load large report/result sets into the browser at once.</li><li><b>Caching:</b> cache stable menu/permission metadata where safe.</li><li><b>Object storage:</b> keep large documents outside the transactional database.</li><li><b>Async work:</b> move long-running jobs to background processing.</li><li><b>Containerisation:</b> keep environments consistent with Docker.</li><li><b>Observability:</b> add logs, health checks and metrics around critical APIs.</li><li><b>Domain separation:</b> keep module boundaries clear so changes are easier to deploy.</li></ol>
+</section>
+
+<section id="projects"><h2>More project case studies</h2><p>Each project below has its own URL so it can be shared independently in a resume, LinkedIn profile or interview discussion.</p>
+<div class="projects">
+<a href="projects/five-star-fans.html"><b>Five Star Fans</b><small>Sports engagement · React · Node · AWS</small></a>
+<a href="projects/derisnap.html"><b>Derisnap</b><small>Trading · React · Node · Kafka · Socket</small></a>
+<a href="projects/focusro.html"><b>FocusRO</b><small>Monitoring · Next.js · Redux</small></a>
+<a href="projects/ternster.html"><b>Ternster</b><small>Courier/travel · GraphQL · Azure Functions</small></a>
+<a href="projects/butlon.html"><b>Butlon</b><small>E-commerce · CodeIgniter · MySQL · React</small></a>
+<a href="projects/mlm.html"><b>MLM Platform</b><small>CodeIgniter · MySQL · PayPal</small></a>
+</div></section>
+
+<section id="about"><h2>About the author</h2><p>I’m Isakki Muthu, a Full-Stack Developer with 8 years of total IT experience, including 7 years of relevant Full-Stack Development experience. My core stack includes React.js, Node.js, Next.js, TypeScript, PostgreSQL, MySQL, MongoDB, AWS, Docker, Kafka, GraphQL and Azure Functions.</p></section>
+<footer><b>Isakki Muthu</b><span>System Design · Full-Stack Development</span><a href="mailto:isakkimuthu02@gmail.com">isakkimuthu02@gmail.com</a></footer>
+</article></div></main>
+<script src="script.js"></script>
+</body></html>
